@@ -2,8 +2,15 @@
 
 Each release is a tag of this repository. Pin the tag in your download URL (see the README).
 
-## v1.0.0 (2026-10-29)
+## v1.0.1 (2026-10-29)
 
+- After an upload, the last count is named for what it is: the waiting runs, this upload's or earlier ones, that a
+  detection confirmed in this upload's check. v1.0.0 said "confirmed by a detection so far", which read as a total
+  for the log.
+- The README says when a run reads pending and when "ran, detection not confirmed", that a detection a later sync
+  brings in still confirms it, and which alerts each EDR's connector takes in.
+
+## v1.0.0 (2026-10-29)
 
 The first public release, for Valystrum v0.21.0 and later.
 

@@ -11,7 +11,6 @@ Valystrum platform it calls is not. Releases are listed in [CHANGELOG.md](CHANGE
 
 > **Status, 2026-10-29.** Written for Valystrum v0.21.0, live on app.valystrum.io.
 
-
 ## Before you start
 
 - Breach and attack simulation is part of the Gold plan and above (Gold, Enterprise and Partner). On another plan
@@ -29,7 +28,7 @@ The uploader is one PowerShell script, `valystrum-atomic.ps1`. Download it at a 
 hosts changes only when you choose, and read it before you run it:
 
 ```powershell
-Invoke-WebRequest https://raw.githubusercontent.com/valystrum/valystrum-atomic-uploader/v1.0.0/valystrum-atomic.ps1 -OutFile valystrum-atomic.ps1
+Invoke-WebRequest https://raw.githubusercontent.com/valystrum/valystrum-atomic-uploader/v1.0.1/valystrum-atomic.ps1 -OutFile valystrum-atomic.ps1
 ```
 
 The script is not code-signed, so an execution policy of `AllSigned` or `Restricted` refuses it however it arrived. A
@@ -46,7 +45,8 @@ pinned tag when [CHANGELOG.md](CHANGELOG.md) lists a release you want.
 1. In Valystrum, Settings, Atomic Red Team uploads: an owner or admin issues the upload secret. It is shown once,
    with the endpoint it signs for. There is one upload secret for your organisation, and every test host uses it.
    Issuing it again rotates it: the old secret stops working at once, so give the new one to each host. An owner or
-   admin can also revoke it on the same page, on any plan; uploads signed with it are refused from then on.
+   admin can also revoke it on the same page, on any plan (where Settings does not list the page, open
+   `/next/settings/bas-uploads`); uploads signed with it are refused from then on.
 2. On the test host, give the uploader the secret through the environment, never on the command line:
 
    ```powershell
@@ -88,16 +88,19 @@ pinned tag when [CHANGELOG.md](CHANGELOG.md) lists a release you want.
 ## What happens to a run
 
 Each test the log records becomes a run on its ATT&CK technique on the BAS / ATT&CK page, with the host it ran on.
-It waits for your EDR, connected in Valystrum, to report that technique (or its parent or a sub-technique) on that
-host inside your detection window: Microsoft Defender for Endpoint, Wazuh or CrowdStrike Falcon today (Microsoft
-Sentinel and Splunk alerts name no host yet, so they do not confirm a run). A detection marks the run detected, and
-prevented only when the EDR itself reported blocking it: Falcon and Defender report a block, Wazuh does not. A run
-nothing confirms reads "ran, detection not confirmed" until an assessor confirms it on the technique's page. Nothing
-is guessed.
+It waits for your EDR, connected in Valystrum, to report that technique (or its parent, or one of its
+sub-techniques) on that host inside your detection window: Microsoft Defender for Endpoint, Wazuh or CrowdStrike
+Falcon today (Microsoft Sentinel and Splunk alerts name no host yet, so they do not confirm a run). A detection marks
+the run detected, and prevented only when the EDR itself reported blocking it: Falcon and Defender report a block,
+Wazuh does not. A run nothing confirms reads "pending" while its detection window is open, then "ran, detection not
+confirmed" until a detection a later sync brings in confirms it (below), or an assessor confirms it on the
+technique's page. Nothing is guessed.
 
-Only an alert its connector takes in can confirm a run. Defender's informational alerts are never taken in, nor are
-Wazuh alerts below the level set on the connection (7 by default). Valystrum keeps one Wazuh finding per rule and
-agent, so a rule that has already alerted on that agent may not confirm a later test.
+Only an alert its connector takes in can confirm a run. The Falcon connector takes in only alerts still new when it
+syncs, so one already set in progress or closed is missed; the Defender connector never takes in informational or
+resolved alerts; and the Wazuh connector skips alerts below the level set on the connection (7 by default).
+Valystrum keeps one Wazuh finding per rule and agent, so a rule that has already alerted on that agent may not confirm
+a later test.
 
 The host is matched by name, ignoring case and comparing only the part before the first dot (an IP address is
 compared whole), so `WS01` in the log matches `ws01.corp.example` in your EDR. If the EDR names the host some other

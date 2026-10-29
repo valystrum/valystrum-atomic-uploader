@@ -77,5 +77,5 @@ $body = @{ log = $log }
 if ($CampaignId) { $body.campaignId = $CampaignId }
 $json = $body | ConvertTo-Json -Compress -Depth 3
 $res = Invoke-RestMethod -Method Post -Uri $Endpoint -MaximumRedirection 0 -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($json)) -Headers @{ "X-CS-Signature" = (Get-Signature $json) }
-Write-Output ("Recorded {0} run(s) from the {1} log; {2} already on record; {3} confirmed by a detection so far." -f $res.data.recorded, $res.data.format, $res.data.duplicates, $res.data.confirmed)
+Write-Output ("Recorded {0} run(s) from the {1} log; {2} already on record; {3} waiting run(s), this upload's or earlier ones, confirmed by a detection in this upload's check." -f $res.data.recorded, $res.data.format, $res.data.duplicates, $res.data.confirmed)
 foreach ($s in $res.data.skipped) { Write-Output ("Skipped entry {0}: {1}" -f $s.entry, $s.reason) }
